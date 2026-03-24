@@ -20,15 +20,24 @@ jobs:
           VERSION=$(grep '^version=' gradle.properties | cut -d'=' -f2)
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
-      - name: Create tag if not exists
+      - name: Create tag and release if not exists
         run: |
           TAG="v${{ steps.version.outputs.version }}"
           if git rev-parse "$TAG" >/dev/null 2>&1; then
             echo "Tag $TAG already exists, skipping."
+            echo "tag_created=false" >> "$GITHUB_ENV"
           else
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git tag "$TAG"
             git push origin "$TAG"
             echo "Created and pushed tag $TAG"
+            echo "tag_created=true" >> "$GITHUB_ENV"
           fi
+
+      - name: Create GitHub Release
+        if: env.tag_created == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          generate_release_notes: true
