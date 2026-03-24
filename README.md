@@ -2,12 +2,46 @@
 
 Type-safe HTTP endpoint contracts for Ktor — bind routing, request/response types, and OpenAPI generation in one place.
 
+## Motivation
+
+Ktor's [`@Resource`](https://ktor.io/docs/server-resources.html) gives you type-safe path and query parameters. But it stops there — the HTTP method, request/response body types, and success status code have no type-level home. Without this library, a typical endpoint looks like this:
+
+```kotlin
+// Route registration
+post<Books> {
+    val request = call.receive<CreateBookRequest>()  // type lives here...
+    val book = createBook(request)
+    call.respond(HttpStatusCode.Created, book)       // ...status code here...
+}
+
+// OpenAPI documentation — written separately, easy to forget or get out of sync
+describe {
+    tag("books")
+    requestBody { schema = jsonSchema<CreateBookRequest>() }  // ...and duplicated here
+    responses {
+        HttpStatusCode.Created { schema = jsonSchema<BookResponse>() }
+    }
+}
+```
+
+Three concerns — routing, serialization, and documentation — are scattered and must be kept in sync manually. If you change the response type or status code in one place, nothing stops the other from drifting.
+
+`ktor-typed-endpoint` captures all of it in one contract object:
+
+```kotlin
+object PostBook : PostEndpointContract<Books, CreateBookRequest, BookResponse>(
+    successStatusCode = HttpStatusCode.Created,
+)
+```
+
+Then a single `endpoint(PostBook) { }` call registers the route, deserializes the request, serializes the response, sets the status code, and generates the OpenAPI documentation — all from the contract.
+
 ## Overview
 
 `ktor-typed-endpoint` lets you define each API endpoint as a single typed object that captures:
 
 - The HTTP method (GET / POST / PUT / PATCH / DELETE)
-- The Ktor [`@Resource`](https://ktor.io/docs/server-resources.html) for type-safe path/query parameters
+- The Ktor `@Resource` for type-safe path/query parameters
 - The request and response body types
 - The success HTTP status code
 
