@@ -68,3 +68,24 @@ abstract class PatchEndpointContract<Resource : Any, Request : Any, Response : A
 abstract class DeleteEndpointContract<Resource : Any, Response : Any>(
     successStatusCode: HttpStatusCode = HttpStatusCode.OK,
 ) : EndpointContract<Resource>(successStatusCode = successStatusCode)
+
+/**
+ * Contract for a `HEAD` endpoint.
+ *
+ * HEAD responses have no body — only status code and headers.
+ *
+ * @param Resource The Ktor `@Resource`-annotated class for the route.
+ */
+abstract class HeadEndpointContract<Resource : Any>(
+    successStatusCode: HttpStatusCode = HttpStatusCode.OK,
+) : EndpointContract<Resource>(successStatusCode = successStatusCode)
+
+/**
+ * Contract for an `OPTIONS` endpoint.
+ *
+ * @param Resource The Ktor `@Resource`-annotated class for the route.
+ * @param Response The response body type.
+ */
+abstract class OptionsEndpointContract<Resource : Any, Response : Any>(
+    successStatusCode: HttpStatusCode = HttpStatusCode.OK,
+) : EndpointContract<Resource>(successStatusCode = successStatusCode)
