@@ -1,0 +1,46 @@
+name: Bump Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bump version
+        id: bump
+        run: |
+          CURRENT=$(grep '^version=' gradle.properties | cut -d'=' -f2)
+          MAJOR=$(echo "$CURRENT" | cut -d. -f1)
+          MINOR=$(echo "$CURRENT" | cut -d. -f2)
+          PATCH=$(echo "$CURRENT" | cut -d. -f3)
+          case "${{ inputs.bump }}" in
+            major) MAJOR=$((MAJOR+1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR+1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH+1)) ;;
+          esac
+          NEW="${MAJOR}.${MINOR}.${PATCH}"
+          sed -i "s/^version=.*/version=${NEW}/" gradle.properties
+          echo "new_version=${NEW}" >> "$GITHUB_OUTPUT"
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "chore: bump version to ${{ steps.bump.outputs.new_version }}"
+          title: "chore: release v${{ steps.bump.outputs.new_version }}"
+          branch: "release/v${{ steps.bump.outputs.new_version }}"
+          body: |
+            Bumps version to `${{ steps.bump.outputs.new_version }}`.
+
+            Merging this PR will automatically create tag `v${{ steps.bump.outputs.new_version }}` and publish to Maven Central.
