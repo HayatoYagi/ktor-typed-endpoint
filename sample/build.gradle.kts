@@ -24,7 +24,6 @@ dependencies {
     implementation(libs.ktor.server.swagger)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.logback.classic)
 }
 
 ktor {
