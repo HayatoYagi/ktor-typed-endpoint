@@ -1,4 +1,5 @@
 import com.vanniktech.maven.publish.SonatypeHost
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -11,6 +12,29 @@ kotlin {
     androidTarget {
         publishLibraryVariants("release")
     }
+    iosArm64()
+    iosX64()
+    iosSimulatorArm64()
+    macosArm64()
+    macosX64()
+    tvosArm64()
+    tvosX64()
+    tvosSimulatorArm64()
+    watchosArm32()
+    watchosArm64()
+    watchosX64()
+    watchosSimulatorArm64()
+    watchosDeviceArm64()
+    linuxArm64()
+    linuxX64()
+    mingwX64()
+    androidNativeArm32()
+    androidNativeArm64()
+    androidNativeX64()
+    androidNativeX86()
+    js { browser(); nodejs() }
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs { browser() }
 
     sourceSets {
         commonMain.dependencies {
@@ -23,7 +47,7 @@ android {
     namespace = "io.github.hayatoyagi.ktortyped"
     compileSdk = 36
     defaultConfig {
-        minSdk = 24
+        minSdk = 21
     }
 }
 
