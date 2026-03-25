@@ -4,6 +4,29 @@
 
 Type-safe HTTP endpoint contracts for Ktor — bind routing, request/response types, and OpenAPI generation in one place.
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Motivation](#motivation)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Features](#features)
+  - [@ApiTag — OpenAPI tag inheritance](#apitag--openapi-tag-inheritance)
+  - [@ApiDescription — model-driven OpenAPI descriptions](#apidescription--model-driven-openapi-descriptions)
+- [Sample App](#sample-app)
+- [License](#license)
+
+## Overview
+
+`ktor-typed-endpoint` lets you define each API endpoint as a single typed object that captures:
+
+- The HTTP method (GET / POST / PUT / PATCH / DELETE)
+- The Ktor `@Resource` for type-safe path/query parameters
+- The request and response body types
+- The success HTTP status code
+
+Route registration and OpenAPI documentation are both driven from this one contract, eliminating duplication and keeping the API definition as the single source of truth.
+
 ## Motivation
 
 Ktor's [`@Resource`](https://ktor.io/docs/server-resources.html) gives you type-safe path and query parameters. But it stops there — the HTTP method, request/response body types, and success status code have no type-level home. Without this library, a typical endpoint looks like this:
@@ -37,17 +60,6 @@ object PostBook : PostEndpointContract<Books, CreateBookRequest, BookResponse>(
 ```
 
 Then a single `endpoint(PostBook) { }` call registers the route, deserializes the request, serializes the response, sets the status code, and generates the OpenAPI documentation — all from the contract.
-
-## Overview
-
-`ktor-typed-endpoint` lets you define each API endpoint as a single typed object that captures:
-
-- The HTTP method (GET / POST / PUT / PATCH / DELETE)
-- The Ktor `@Resource` for type-safe path/query parameters
-- The request and response body types
-- The success HTTP status code
-
-Route registration and OpenAPI documentation are both driven from this one contract, eliminating duplication and keeping the API definition as the single source of truth.
 
 ## Installation
 
