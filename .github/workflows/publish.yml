@@ -4,6 +4,16 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_call:
+    secrets:
+      SONATYPE_USERNAME:
+        required: true
+      SONATYPE_PASSWORD:
+        required: true
+      GPG_PRIVATE_KEY:
+        required: true
+      GPG_PASSPHRASE:
+        required: true
 
 jobs:
   publish:
