@@ -6,6 +6,9 @@ on:
     paths:
       - 'gradle.properties'
 
+permissions:
+  contents: write
+
 jobs:
   tag:
     runs-on: ubuntu-latest
