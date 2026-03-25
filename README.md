@@ -1,5 +1,7 @@
 # ktor-typed-endpoint
 
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.hayatoyagi/ktor-typed-endpoint-core)](https://central.sonatype.com/artifact/io.github.hayatoyagi/ktor-typed-endpoint-core)
+
 Type-safe HTTP endpoint contracts for Ktor — bind routing, request/response types, and OpenAPI generation in one place.
 
 ## Motivation
