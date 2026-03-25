@@ -22,7 +22,7 @@ Type-safe HTTP endpoint contracts for Ktor — bind routing, request/response ty
 
 - The HTTP method (GET / POST / PUT / PATCH / DELETE)
 - The Ktor `@Resource` for type-safe path/query parameters
-- The request and response body types
+- The request and response body types — deserialized and passed as a typed argument to the handler
 - The success HTTP status code
 
 Route registration and OpenAPI documentation are both driven from this one contract, eliminating duplication and keeping the API definition as the single source of truth.
