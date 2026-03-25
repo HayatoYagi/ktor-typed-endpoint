@@ -29,37 +29,41 @@ Route registration and OpenAPI documentation are both driven from this one contr
 
 ## Motivation
 
-Ktor's [`@Resource`](https://ktor.io/docs/server-resources.html) gives you type-safe path and query parameters. But it stops there — the HTTP method, request/response body types, and success status code have no type-level home. Without this library, a typical endpoint looks like this:
+Ktor's [`@Resource`](https://ktor.io/docs/server-resources.html) gives you type-safe path and query parameters. But it stops there — the HTTP method, request/response body types, and success status code have no type-level home.
+
+**Before** — routing, serialization, and documentation are scattered across three separate blocks that must be kept in sync manually:
 
 ```kotlin
-// Route registration
+// 1. Route registration
 post<Books> {
-    val request = call.receive<CreateBookRequest>()  // type lives here...
+    val request = call.receive<CreateBookRequest>()
     val book = createBook(request)
-    call.respond(HttpStatusCode.Created, book)       // ...status code here...
+    call.respond(HttpStatusCode.Created, book)
 }
 
-// OpenAPI documentation — written separately, easy to forget or get out of sync
+// 2. OpenAPI documentation — written separately, easy to forget or get out of sync
 describe {
     tag("books")
-    requestBody { schema = jsonSchema<CreateBookRequest>() }  // ...and duplicated here
+    requestBody { schema = jsonSchema<CreateBookRequest>() }
     responses {
         HttpStatusCode.Created { schema = jsonSchema<BookResponse>() }
     }
 }
 ```
 
-Three concerns — routing, serialization, and documentation — are scattered and must be kept in sync manually. If you change the response type or status code in one place, nothing stops the other from drifting.
-
-`ktor-typed-endpoint` captures all of it in one contract object:
+**After** — one contract object is the single source of truth:
 
 ```kotlin
+// 1. Define the contract once
 object PostBook : PostEndpointContract<Books, CreateBookRequest, BookResponse>(
     successStatusCode = HttpStatusCode.Created,
 )
-```
 
-Then a single `endpoint(PostBook) { }` call registers the route, deserializes the request, serializes the response, sets the status code, and generates the OpenAPI documentation — all from the contract.
+// 2. Register the route — routing, serialization, status code, and OpenAPI are all handled
+endpoint(PostBook) { _, request ->
+    createBook(request)
+}
+```
 
 ## Installation
 
