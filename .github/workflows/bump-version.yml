@@ -40,7 +40,6 @@ jobs:
       - name: Create pull request
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.WORKFLOW_TOKEN || github.token }}
           commit-message: "chore: bump version to ${{ steps.bump.outputs.new_version }}"
           title: "chore: release v${{ steps.bump.outputs.new_version }}"
           branch: "release/v${{ steps.bump.outputs.new_version }}"
