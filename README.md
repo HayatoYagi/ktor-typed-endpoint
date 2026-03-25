@@ -1,40 +1,20 @@
 # ktor-typed-endpoint
 
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.hayatoyagi/ktor-typed-endpoint-core)](https://central.sonatype.com/artifact/io.github.hayatoyagi/ktor-typed-endpoint-core)
+
 Type-safe HTTP endpoint contracts for Ktor — bind routing, request/response types, and OpenAPI generation in one place.
 
-## Motivation
+## Table of Contents
 
-Ktor's [`@Resource`](https://ktor.io/docs/server-resources.html) gives you type-safe path and query parameters. But it stops there — the HTTP method, request/response body types, and success status code have no type-level home. Without this library, a typical endpoint looks like this:
-
-```kotlin
-// Route registration
-post<Books> {
-    val request = call.receive<CreateBookRequest>()  // type lives here...
-    val book = createBook(request)
-    call.respond(HttpStatusCode.Created, book)       // ...status code here...
-}
-
-// OpenAPI documentation — written separately, easy to forget or get out of sync
-describe {
-    tag("books")
-    requestBody { schema = jsonSchema<CreateBookRequest>() }  // ...and duplicated here
-    responses {
-        HttpStatusCode.Created { schema = jsonSchema<BookResponse>() }
-    }
-}
-```
-
-Three concerns — routing, serialization, and documentation — are scattered and must be kept in sync manually. If you change the response type or status code in one place, nothing stops the other from drifting.
-
-`ktor-typed-endpoint` captures all of it in one contract object:
-
-```kotlin
-object PostBook : PostEndpointContract<Books, CreateBookRequest, BookResponse>(
-    successStatusCode = HttpStatusCode.Created,
-)
-```
-
-Then a single `endpoint(PostBook) { }` call registers the route, deserializes the request, serializes the response, sets the status code, and generates the OpenAPI documentation — all from the contract.
+- [Overview](#overview)
+- [Motivation](#motivation)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Features](#features)
+  - [@ApiTag — OpenAPI tag inheritance](#apitag--openapi-tag-inheritance)
+  - [@ApiDescription — model-driven OpenAPI descriptions](#apidescription--model-driven-openapi-descriptions)
+- [Sample App](#sample-app)
+- [License](#license)
 
 ## Overview
 
@@ -42,10 +22,48 @@ Then a single `endpoint(PostBook) { }` call registers the route, deserializes th
 
 - The HTTP method (GET / POST / PUT / PATCH / DELETE)
 - The Ktor `@Resource` for type-safe path/query parameters
-- The request and response body types
+- The request and response body types — deserialized and passed as a typed argument to the handler
 - The success HTTP status code
 
 Route registration and OpenAPI documentation are both driven from this one contract, eliminating duplication and keeping the API definition as the single source of truth.
+
+## Motivation
+
+Ktor's [`@Resource`](https://ktor.io/docs/server-resources.html) gives you type-safe path and query parameters. But it stops there — the HTTP method, request/response body types, and success status code have no type-level home.
+
+**Before** — routing, serialization, and documentation are scattered across three separate blocks that must be kept in sync manually:
+
+```kotlin
+// 1. Route registration
+post<Books> {
+    val request = call.receive<CreateBookRequest>()
+    val book = createBook(request)
+    call.respond(HttpStatusCode.Created, book)
+}
+
+// 2. OpenAPI documentation — written separately, easy to forget or get out of sync
+describe {
+    tag("books")
+    requestBody { schema = jsonSchema<CreateBookRequest>() }
+    responses {
+        HttpStatusCode.Created { schema = jsonSchema<BookResponse>() }
+    }
+}
+```
+
+**After** — one contract object is the single source of truth:
+
+```kotlin
+// 1. Define the contract once
+object PostBook : PostEndpointContract<Books, CreateBookRequest, BookResponse>(
+    successStatusCode = HttpStatusCode.Created,
+)
+
+// 2. Register the route — routing, serialization, status code, and OpenAPI are all handled
+endpoint(PostBook) { _, request ->
+    createBook(request)
+}
+```
 
 ## Installation
 
