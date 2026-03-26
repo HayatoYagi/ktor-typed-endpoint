@@ -26,7 +26,7 @@ jobs:
           distribution: 'temurin'
       - uses: gradle/actions/setup-gradle@v4
       - name: Publish
-        run: ./gradlew :core:publishAllPublicationsToMavenCentralRepository :ktor-server:publishAllPublicationsToMavenCentralRepository
+        run: ./gradlew :core:publishAllPublicationsToMavenCentralRepository :ktor-server:publishAllPublicationsToMavenCentralRepository :ktor-client:publishAllPublicationsToMavenCentralRepository :ktor-client-ksp:publishAllPublicationsToMavenCentralRepository
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_PASSWORD }}
