@@ -10,6 +10,8 @@ Type-safe HTTP endpoint contracts for Ktor — bind routing, request/response ty
 - [Motivation](#motivation)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
+  - [Server](#server)
+  - [Client (KSP)](#client-ksp)
 - [Features](#features)
   - [@ApiTag — OpenAPI tag inheritance](#apitag--openapi-tag-inheritance)
   - [@ApiDescription — model-driven OpenAPI descriptions](#apidescription--model-driven-openapi-descriptions)
@@ -75,16 +77,24 @@ repositories {
 ```
 
 ```kotlin
-// shared module (contracts live here — KMP: JVM + Android)
+// shared module (contracts live here — KMP: JVM + Android + iOS + JS/Wasm)
 implementation("io.github.hayatoyagi:ktor-typed-endpoint-core:<version>")
 
 // server module (route registration + OpenAPI)
 implementation("io.github.hayatoyagi:ktor-typed-endpoint-ktor-server:<version>")
+
+// client module (generated extension functions runtime)
+implementation("io.github.hayatoyagi:ktor-typed-endpoint-ktor-client:<version>")
+
+// KSP processor (generates suspend fun HttpClient.contractName(...) per contract)
+ksp("io.github.hayatoyagi:ktor-typed-endpoint-ktor-client-ksp:<version>")
 ```
 
 ## Quick Start
 
-### 1. Define your resources
+### Server
+
+#### 1. Define your resources
 
 ```kotlin
 @Serializable
@@ -101,7 +111,7 @@ class ApiRoutes {
 }
 ```
 
-### 2. Define contracts
+#### 2. Define contracts
 
 ```kotlin
 object GetBooks : GetEndpointContract<ApiRoutes.Books, BookListResponse>()
@@ -115,7 +125,7 @@ object PutBook : PutEndpointContract<ApiRoutes.Books.ById, UpdateBookRequest, Bo
 object PatchBook : PatchEndpointContract<ApiRoutes.Books.ById, PatchBookRequest, BookResponse>()
 ```
 
-### 3. Register routes
+#### 3. Register routes
 
 ```kotlin
 fun Route.bookRoutes() {
@@ -138,6 +148,45 @@ fun Route.bookRoutes() {
 ```
 
 Route registration, request deserialization, response serialization, and OpenAPI documentation are all handled automatically.
+
+### Client (KSP)
+
+The KSP processor reads every `EndpointContract` object in the module and generates a `suspend fun HttpClient.contractName(...)` extension function. Path and query parameters from the `@Resource` class are flattened into individual arguments — no manual `Resource` construction needed.
+
+Given the contracts above, the processor generates:
+
+```kotlin
+suspend fun HttpClient.getBooks(): BookListResponse
+suspend fun HttpClient.getBookById(id: String): BookResponse
+suspend fun HttpClient.postBook(body: CreateBookRequest): BookResponse
+suspend fun HttpClient.putBook(id: String, body: UpdateBookRequest): BookResponse
+```
+
+Use them directly — only the contract needs to be imported:
+
+```kotlin
+val client = HttpClient(CIO) {
+    install(Resources)
+    install(ContentNegotiation) { json() }
+    defaultRequest { url("https://api.example.com") }
+}
+
+val book = client.getBookById(id = "42")
+val created = client.postBook(body = CreateBookRequest(title = "Kotlin in Action", authorId = "1"))
+```
+
+For KMP modules, apply the processor via `kspCommonMainMetadata` and add the generated source directory:
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    kspCommonMainMetadata("io.github.hayatoyagi:ktor-typed-endpoint-ktor-client-ksp:<version>")
+}
+
+kotlin.sourceSets.commonMain {
+    kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
+}
+```
 
 ## Features
 
