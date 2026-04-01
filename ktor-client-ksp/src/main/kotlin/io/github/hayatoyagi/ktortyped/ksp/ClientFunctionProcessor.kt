@@ -9,7 +9,6 @@ import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
-import com.google.devtools.ksp.symbol.KSValueParameter
 
 private val ENDPOINT_CONTRACT_TYPES = mapOf(
     "io.github.hayatoyagi.ktortyped.GetEndpointContract" to ContractKind.GET,
@@ -116,7 +115,11 @@ internal class ClientFunctionProcessor(
         val dataParams = collectDataParams(resourceClass)
         val paramList = mutableListOf<String>()
         dataParams.forEach { param ->
-            paramList.add("${param.name}: ${param.typeFqn}")
+            if (param.isOptional) {
+                paramList.add("${param.name}: ${param.typeFqn}? = null")
+            } else {
+                paramList.add("${param.name}: ${param.typeFqn}")
+            }
         }
 
         if (kind.hasBody) {
@@ -130,7 +133,7 @@ internal class ClientFunctionProcessor(
         val paramsStr = if (paramList.isEmpty()) "" else "\n    ${paramList.joinToString(",\n    ")},\n"
         val responseFqn = responseType.toFqnString()
         val contractFqn = obj.qualifiedName?.asString()
-        val resourceExpr = buildResourceExpr(resourceClass, dataParams)
+        val resourceExpr = buildConditionalResourceExpr(resourceClass, dataParams)
 
         sb.appendLine("suspend fun HttpClient.$functionName($paramsStr): $responseFqn =")
         if (kind.hasBody) {
@@ -141,12 +144,13 @@ internal class ClientFunctionProcessor(
         sb.appendLine()
     }
 
-    private data class DataParam(val name: String, val typeFqn: String)
+    private data class DataParam(val name: String, val typeFqn: String, val isOptional: Boolean)
 
     /**
      * Recursively collects non-parent constructor parameters from [resourceClass] and its parent chain.
      * Parameters named "parent" with a default value are skipped (Ktor resource hierarchy boilerplate).
      * Parameters named "parent" without a default value are resolved recursively.
+     * Parameters with a default value are marked as optional.
      */
     private fun collectDataParams(resourceClass: KSClassDeclaration): List<DataParam> {
         val constructor = resourceClass.primaryConstructor ?: return emptyList()
@@ -161,15 +165,53 @@ internal class ClientFunctionProcessor(
                 }
                 // parent with default → skip
             } else {
-                result.add(DataParam(param.name!!.asString(), param.type.resolve().toFqnString()))
+                result.add(
+                    DataParam(
+                        name = param.name!!.asString(),
+                        typeFqn = param.type.resolve().toFqnString(),
+                        isOptional = param.hasDefault,
+                    ),
+                )
             }
         }
         return result
     }
 
     /**
-     * Builds the constructor call expression for [resourceClass], filling in data params by name
-     * and reconstructing parent params recursively when they lack default values.
+     * Builds the resource construction expression, generating a `when` expression when optional
+     * parameters are present so each branch omits null params and lets the Resource use its defaults.
+     */
+    private fun buildConditionalResourceExpr(
+        resourceClass: KSClassDeclaration,
+        dataParams: List<DataParam>,
+    ): String {
+        val optionalParams = dataParams.filter { it.isOptional }
+        if (optionalParams.isEmpty()) {
+            return buildResourceExpr(resourceClass, dataParams)
+        }
+
+        val sb = StringBuilder()
+        sb.appendLine("when {")
+        val n = optionalParams.size
+        // Iterate from all-present (2^n - 1) down to none-present (0)
+        for (mask in ((1 shl n) - 1) downTo 0) {
+            val presentOptionals = optionalParams.filterIndexed { i, _ -> (mask shr i) and 1 == 1 }
+            val paramsForCall = dataParams.filter { !it.isOptional || it in presentOptionals }
+            val resourceExpr = buildResourceExpr(resourceClass, paramsForCall)
+            if (mask == 0) {
+                sb.appendLine("        else -> $resourceExpr")
+            } else {
+                val condition = presentOptionals.joinToString(" && ") { "${it.name} != null" }
+                sb.appendLine("        $condition -> $resourceExpr")
+            }
+        }
+        sb.append("    }")
+        return sb.toString()
+    }
+
+    /**
+     * Builds a single constructor call expression for [resourceClass] using only the params in [dataParams].
+     * Params not present in [dataParams] are omitted, allowing the Resource to use its default values.
      */
     private fun buildResourceExpr(
         resourceClass: KSClassDeclaration,
@@ -187,13 +229,13 @@ internal class ClientFunctionProcessor(
                 name == "parent" && !param.hasDefault -> {
                     val parentClass = param.type.resolve().declaration as? KSClassDeclaration
                     if (parentClass != null) {
-                        // collect only the params that belong to the parent subtree
                         val parentDataParams = collectDataParams(parentClass)
                             .filter { it.name in dataParamNames }
                         args.add("parent = ${buildResourceExpr(parentClass, parentDataParams)}")
                     }
                 }
-                else -> args.add("$name = $name")
+                name in dataParamNames -> args.add("$name = $name")
+                // else: omit — Resource uses its default value
             }
         }
 
@@ -212,5 +254,4 @@ internal class ClientFunctionProcessor(
         val nullMark = if (isMarkedNullable) "?" else ""
         return "$base$typeArgStr$nullMark"
     }
-
 }
