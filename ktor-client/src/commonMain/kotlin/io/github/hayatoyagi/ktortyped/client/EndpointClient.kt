@@ -21,7 +21,7 @@ import io.github.hayatoyagi.ktortyped.PutEndpointContract
  * Intended to be called from KSP-generated client functions — use those instead of calling this directly.
  */
 suspend inline fun <reified Resource : Any, reified Response : Any> HttpClient.request(
-    contract: GetEndpointContract<Resource, Response>,
+    @Suppress("UNUSED_PARAMETER") contract: GetEndpointContract<Resource, Response>,
     resource: Resource,
 ): Response = get(resource).body()
 
@@ -29,7 +29,7 @@ suspend inline fun <reified Resource : Any, reified Response : Any> HttpClient.r
  * Sends a `POST` request described by [contract] with [body] for the given [resource].
  */
 suspend inline fun <reified Resource : Any, reified Request : Any, reified Response : Any> HttpClient.request(
-    contract: PostEndpointContract<Resource, Request, Response>,
+    @Suppress("UNUSED_PARAMETER") contract: PostEndpointContract<Resource, Request, Response>,
     resource: Resource,
     body: Request,
 ): Response = post(resource) { setBody(body) }.body()
@@ -38,7 +38,7 @@ suspend inline fun <reified Resource : Any, reified Request : Any, reified Respo
  * Sends a `PUT` request described by [contract] with [body] for the given [resource].
  */
 suspend inline fun <reified Resource : Any, reified Request : Any, reified Response : Any> HttpClient.request(
-    contract: PutEndpointContract<Resource, Request, Response>,
+    @Suppress("UNUSED_PARAMETER") contract: PutEndpointContract<Resource, Request, Response>,
     resource: Resource,
     body: Request,
 ): Response = put(resource) { setBody(body) }.body()
@@ -47,7 +47,7 @@ suspend inline fun <reified Resource : Any, reified Request : Any, reified Respo
  * Sends a `PATCH` request described by [contract] with [body] for the given [resource].
  */
 suspend inline fun <reified Resource : Any, reified Request : Any, reified Response : Any> HttpClient.request(
-    contract: PatchEndpointContract<Resource, Request, Response>,
+    @Suppress("UNUSED_PARAMETER") contract: PatchEndpointContract<Resource, Request, Response>,
     resource: Resource,
     body: Request,
 ): Response = patch(resource) { setBody(body) }.body()
@@ -56,6 +56,6 @@ suspend inline fun <reified Resource : Any, reified Request : Any, reified Respo
  * Sends a `DELETE` request described by [contract] for the given [resource].
  */
 suspend inline fun <reified Resource : Any, reified Response : Any> HttpClient.request(
-    contract: DeleteEndpointContract<Resource, Response>,
+    @Suppress("UNUSED_PARAMETER") contract: DeleteEndpointContract<Resource, Response>,
     resource: Resource,
 ): Response = delete(resource).body()

@@ -69,7 +69,7 @@ internal class ClientFunctionProcessor(
     ) {
         val sourceFiles = contracts.mapNotNull { (obj, _, _) -> obj.containingFile }
         val file = codeGenerator.createNewFile(
-            Dependencies(false, *sourceFiles.toTypedArray()),
+            Dependencies(aggregating = true, *sourceFiles.toTypedArray()),
             packageName,
             "GeneratedClientFunctions",
         )
@@ -213,8 +213,4 @@ internal class ClientFunctionProcessor(
         return "$base$typeArgStr$nullMark"
     }
 
-    private fun KSValueParameter.toParamString(): String {
-        val name = name?.asString() ?: "_"
-        return "$name: ${type.resolve().toFqnString()}"
-    }
 }

@@ -11,7 +11,7 @@ kotlin {
 
 dependencies {
     compileOnly(libs.ksp.api)
-    implementation(project(":ktor-client"))
+    compileOnly(project(":ktor-client"))
 }
 
 mavenPublishing {
