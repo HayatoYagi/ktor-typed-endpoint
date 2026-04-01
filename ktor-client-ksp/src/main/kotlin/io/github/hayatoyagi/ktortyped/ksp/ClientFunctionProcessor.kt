@@ -227,13 +227,15 @@ internal class ClientFunctionProcessor(
         for (param in constructor.parameters) {
             val name = param.name?.asString() ?: continue
             when {
-                name == "parent" && param.hasDefault -> { /* omit — use default */ }
-                name == "parent" && !param.hasDefault -> {
+                name == "parent" -> {
                     val parentClass = param.type.resolve().declaration as? KSClassDeclaration
                     if (parentClass != null) {
                         val parentDataParams = collectDataParams(parentClass)
                             .filter { it.name in dataParamNames }
-                        args.add("parent = ${buildResourceExpr(parentClass, parentDataParams)}")
+                        if (parentDataParams.isNotEmpty()) {
+                            args.add("parent = ${buildResourceExpr(parentClass, parentDataParams)}")
+                        }
+                        // parentDataParams empty → omit, use default (or no-arg constructor)
                     }
                 }
                 name in dataParamNames -> args.add("$name = $name")
