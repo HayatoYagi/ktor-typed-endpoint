@@ -7,7 +7,7 @@ android-minSdk = "24"
 logback = "1.5.29"
 kotlinx-serialization = "1.10.0"
 vanniktech-publish = "0.31.0"
-ksp = "2.2.21-2.0.5"
+ksp = "2.3.6"
 
 [libraries]
 ktor-http = { module = "io.ktor:ktor-http", version.ref = "ktor" }
