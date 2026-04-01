@@ -20,6 +20,8 @@ dependencies {
     testImplementation(libs.ktor.server.content.negotiation)
     testImplementation(libs.ktor.serialization.kotlinx.json)
     testImplementation(libs.kotlinx.serialization.json)
+    testImplementation(libs.ktor.client.resources)
+    testImplementation(libs.ktor.client.content.negotiation)
 }
 
 tasks.withType<Test>().configureEach {

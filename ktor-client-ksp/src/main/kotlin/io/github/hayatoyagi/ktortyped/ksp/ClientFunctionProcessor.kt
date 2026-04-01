@@ -149,8 +149,8 @@ internal class ClientFunctionProcessor(
 
     /**
      * Recursively collects non-parent constructor parameters from [resourceClass] and its parent chain.
-     * Parameters named "parent" with a default value are skipped (Ktor resource hierarchy boilerplate).
-     * Parameters named "parent" without a default value are resolved recursively.
+     * Always recurses into the parent type. A parent class is treated as boilerplate and skipped only
+     * when it has no non-parent constructor params (e.g., a top-level container like ApiRoutes).
      * Parameters with a default value are marked as optional.
      */
     private fun collectDataParams(resourceClass: KSClassDeclaration): List<DataParam> {
@@ -158,13 +158,14 @@ internal class ClientFunctionProcessor(
         val result = mutableListOf<DataParam>()
         for (param in constructor.parameters) {
             if (param.name?.asString() == "parent") {
-                if (!param.hasDefault) {
-                    val parentClass = param.type.resolve().declaration as? KSClassDeclaration
-                    if (parentClass != null) {
-                        result.addAll(0, collectDataParams(parentClass))
+                val parentClass = param.type.resolve().declaration as? KSClassDeclaration
+                if (parentClass != null) {
+                    val parentParams = collectDataParams(parentClass)
+                    if (parentParams.isNotEmpty()) {
+                        result.addAll(0, parentParams)
                     }
+                    // parentParams empty → parent is boilerplate (no meaningful params) → skip
                 }
-                // parent with default → skip
             } else {
                 result.add(
                     DataParam(
