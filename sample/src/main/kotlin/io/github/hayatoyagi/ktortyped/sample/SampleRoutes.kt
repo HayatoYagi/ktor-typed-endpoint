@@ -11,7 +11,7 @@ class SampleRoutes {
     @ApiTag("books")
     @Serializable
     @Resource("books")
-    class Books(val parent: SampleRoutes = SampleRoutes()) {
+    class Books(val parent: SampleRoutes = SampleRoutes(), val sort: String? = null) {
 
         @Serializable
         @Resource("{id}")

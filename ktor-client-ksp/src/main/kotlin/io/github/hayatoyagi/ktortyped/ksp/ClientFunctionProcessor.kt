@@ -116,7 +116,8 @@ internal class ClientFunctionProcessor(
         val paramList = mutableListOf<String>()
         dataParams.forEach { param ->
             if (param.isOptional) {
-                paramList.add("${param.name}: ${param.typeFqn}? = null")
+                val nullableFqn = if (param.typeFqn.endsWith("?")) param.typeFqn else "${param.typeFqn}?"
+                paramList.add("${param.name}: $nullableFqn = null")
             } else {
                 paramList.add("${param.name}: ${param.typeFqn}")
             }
