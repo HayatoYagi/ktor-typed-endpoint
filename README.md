@@ -10,6 +10,8 @@ Type-safe HTTP endpoint contracts for Ktor — bind routing, request/response ty
 - [Motivation](#motivation)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
+  - [Server](#server)
+  - [Client](#client)
 - [Features](#features)
   - [@ApiTag — OpenAPI tag inheritance](#apitag--openapi-tag-inheritance)
   - [@ApiDescription — model-driven OpenAPI descriptions](#apidescription--model-driven-openapi-descriptions)
@@ -75,16 +77,21 @@ repositories {
 ```
 
 ```kotlin
-// shared module (contracts live here — KMP: JVM + Android)
+// shared module (contracts live here — KMP: JVM + Android + iOS + JS/Wasm)
 implementation("io.github.hayatoyagi:ktor-typed-endpoint-core:<version>")
 
 // server module (route registration + OpenAPI)
 implementation("io.github.hayatoyagi:ktor-typed-endpoint-ktor-server:<version>")
+
+// client module (type-safe HTTP requests)
+implementation("io.github.hayatoyagi:ktor-typed-endpoint-ktor-client:<version>")
 ```
 
 ## Quick Start
 
-### 1. Define your resources
+### Server
+
+#### 1. Define your resources
 
 ```kotlin
 @Serializable
@@ -101,7 +108,7 @@ class ApiRoutes {
 }
 ```
 
-### 2. Define contracts
+#### 2. Define contracts
 
 ```kotlin
 object GetBooks : GetEndpointContract<ApiRoutes.Books, BookListResponse>()
@@ -115,7 +122,7 @@ object PutBook : PutEndpointContract<ApiRoutes.Books.ById, UpdateBookRequest, Bo
 object PatchBook : PatchEndpointContract<ApiRoutes.Books.ById, PatchBookRequest, BookResponse>()
 ```
 
-### 3. Register routes
+#### 3. Register routes
 
 ```kotlin
 fun Route.bookRoutes() {
@@ -138,6 +145,36 @@ fun Route.bookRoutes() {
 ```
 
 Route registration, request deserialization, response serialization, and OpenAPI documentation are all handled automatically.
+
+### Client
+
+The `ktor-client` module provides `HttpClient.request(contract, resource)` extension functions. The response type is inferred from the contract — no explicit type annotation needed.
+
+```kotlin
+val client = HttpClient(CIO) {
+    install(Resources)
+    install(ContentNegotiation) { json() }
+    defaultRequest { url("https://api.example.com") }
+}
+
+// Response type (BookListResponse) is inferred from GetBooks contract
+val books = client.request(GetBooks, ApiRoutes.Books())
+
+// POST with request body
+val created = client.request(PostBook, ApiRoutes.Books(), CreateBookRequest(title = "Kotlin in Action", authorId = "1"))
+
+// Nested resource with path parameter
+val book = client.request(GetBookById, ApiRoutes.Books.ById(id = "42"))
+```
+
+Compare with plain Ktor — where you must specify the response type manually and know the HTTP method:
+
+```kotlin
+// plain Ktor
+val books: BookListResponse = client.get(ApiRoutes.Books()).body()
+```
+
+With `request(contract, resource)`, the contract encodes the HTTP method and response type, so you can't accidentally use the wrong type or method.
 
 ## Features
 
