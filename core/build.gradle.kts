@@ -1,4 +1,3 @@
-import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
@@ -9,8 +8,10 @@ plugins {
 
 kotlin {
     jvm()
-    androidTarget {
-        publishLibraryVariants("release")
+    android {
+        namespace = "io.github.hayatoyagi.ktortyped"
+        compileSdk = 36
+        minSdk = 21
     }
     iosArm64()
     iosX64()
@@ -43,16 +44,8 @@ kotlin {
     }
 }
 
-android {
-    namespace = "io.github.hayatoyagi.ktortyped"
-    compileSdk = 36
-    defaultConfig {
-        minSdk = 21
-    }
-}
-
 mavenPublishing {
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    publishToMavenCentral()
     signAllPublications()
     coordinates("io.github.hayatoyagi", "ktor-typed-endpoint-core", project.version.toString())
     pom {

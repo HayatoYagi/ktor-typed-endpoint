@@ -8,6 +8,7 @@ Type-safe HTTP endpoint contracts for Ktor — bind routing, request/response ty
 
 - [Overview](#overview)
 - [Motivation](#motivation)
+- [Requirements](#requirements)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Features](#features)
@@ -64,6 +65,12 @@ endpoint(PostBook) { _, request ->
     createBook(request)
 }
 ```
+
+## Requirements
+
+- Kotlin 2.4.10+ — earlier compilers may fail to read the published Kotlin/Native, JS, and Wasm klibs for non-JVM/Android targets.
+- Ktor 3.5.x — `ktor-typed-endpoint-ktor-server`'s public API is built against Ktor 3.5.2; other Ktor 3.x versions should generally work, but matching your app's Ktor version to the same 3.5.x line is recommended.
+- Android: `compileSdk` 36, `minSdk` 21+.
 
 ## Installation
 
