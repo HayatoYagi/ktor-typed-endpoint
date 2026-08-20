@@ -1,6 +1,7 @@
 package io.github.hayatoyagi.ktortyped.client
 
 import io.github.hayatoyagi.ktortyped.GetEndpointContract
+import io.github.hayatoyagi.ktortyped.PostEndpointContract
 import io.github.hayatoyagi.ktortyped.server.endpoint
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
@@ -40,10 +41,17 @@ data class ItemResponse(val id: String, val name: String)
 @Serializable
 data class ItemErrorResponse(val message: String)
 
+@Serializable
+data class CreateItemRequest(val name: String)
+
 class ItemNotFoundException(val id: String) : Exception("Item not found: $id")
+class ItemValidationException(message: String) : Exception(message)
 
 object GetItemById : GetEndpointContract<Items.ById, ItemResponse, ItemErrorResponse>()
 object GetItemByIdNoTypedError : GetEndpointContract<Items.ByIdNoTypedError, ItemResponse, Unit>()
+object CreateItem : PostEndpointContract<Items, CreateItemRequest, ItemResponse, ItemErrorResponse>(
+    successStatusCode = HttpStatusCode.Created,
+)
 
 private fun withTestApp(block: suspend HttpClient.() -> Unit) = testApplication {
     application {
@@ -52,6 +60,9 @@ private fun withTestApp(block: suspend HttpClient.() -> Unit) = testApplication 
         install(StatusPages) {
             exception<ItemNotFoundException> { call, cause ->
                 call.respond(HttpStatusCode.NotFound, ItemErrorResponse(cause.message ?: "not found"))
+            }
+            exception<ItemValidationException> { call, cause ->
+                call.respond(HttpStatusCode.BadRequest, ItemErrorResponse(cause.message ?: "invalid"))
             }
         }
         routing {
@@ -62,6 +73,10 @@ private fun withTestApp(block: suspend HttpClient.() -> Unit) = testApplication 
             endpoint(GetItemByIdNoTypedError) { resource ->
                 if (resource.id == "missing") throw ItemNotFoundException(resource.id)
                 ItemResponse(resource.id, "item-${resource.id}")
+            }
+            endpoint(CreateItem) { _, request ->
+                if (request.name.isBlank()) throw ItemValidationException("name must not be blank")
+                ItemResponse(id = "new", name = request.name)
             }
         }
     }
@@ -97,5 +112,20 @@ class EndpointClientTest {
         }
         assertEquals(HttpStatusCode.NotFound, exception.status)
         assertEquals(Unit, exception.errorBody)
+    }
+
+    @Test
+    fun `successful POST sends the request body and returns the typed response`() = withTestApp {
+        val response = request(CreateItem, Items(), CreateItemRequest(name = "widget"))
+        assertEquals("widget", response.name)
+    }
+
+    @Test
+    fun `failed POST throws EndpointErrorException with typed error body`() = withTestApp {
+        val exception = assertFailsWith<EndpointErrorException> {
+            request(CreateItem, Items(), CreateItemRequest(name = ""))
+        }
+        assertEquals(HttpStatusCode.BadRequest, exception.status)
+        assertEquals("name must not be blank", exception.errorBodyAs<ItemErrorResponse>()?.message)
     }
 }
