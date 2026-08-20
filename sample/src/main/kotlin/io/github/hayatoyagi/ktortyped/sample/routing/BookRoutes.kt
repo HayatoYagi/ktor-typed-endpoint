@@ -1,7 +1,9 @@
 package io.github.hayatoyagi.ktortyped.sample.routing
 
+import io.github.hayatoyagi.ktortyped.sample.ApiException
 import io.github.hayatoyagi.ktortyped.sample.BookListResponse
 import io.github.hayatoyagi.ktortyped.sample.BookResponse
+import io.github.hayatoyagi.ktortyped.sample.ErrorResponse
 import io.github.hayatoyagi.ktortyped.sample.GetBookById
 import io.github.hayatoyagi.ktortyped.sample.GetBookReviews
 import io.github.hayatoyagi.ktortyped.sample.GetBooks
@@ -10,10 +12,14 @@ import io.github.hayatoyagi.ktortyped.sample.PostBook
 import io.github.hayatoyagi.ktortyped.sample.PutBook
 import io.github.hayatoyagi.ktortyped.sample.ReviewListResponse
 import io.github.hayatoyagi.ktortyped.server.endpoint
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.routing.Route
 
-/** Thrown by [bookRoutes] for an unknown book id; mapped to a 404 + `ErrorResponse` by `StatusPages` in `SampleApp`. */
-class BookNotFoundException(id: String) : Exception("Book not found: $id")
+/** Thrown by [bookRoutes] for an unknown book id; mapped to its [error] response by the generic [ApiException] handler. */
+class BookNotFoundException(id: String) : ApiException(
+    status = HttpStatusCode.NotFound,
+    error = ErrorResponse(code = "BOOK_NOT_FOUND", message = "Book not found: $id"),
+)
 
 fun Route.bookRoutes() {
     endpoint(GetBooks) {

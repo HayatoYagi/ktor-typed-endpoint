@@ -1,10 +1,8 @@
 package io.github.hayatoyagi.ktortyped.sample
 
 import io.github.hayatoyagi.ktortyped.sample.routing.authorRoutes
-import io.github.hayatoyagi.ktortyped.sample.routing.BookNotFoundException
 import io.github.hayatoyagi.ktortyped.sample.routing.bookRoutes
 import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
 import io.ktor.openapi.OpenApiInfo
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
@@ -38,8 +36,10 @@ fun Application.configureSample() {
     install(Resources)
     install(ContentNegotiation) { json() }
     install(StatusPages) {
-        exception<BookNotFoundException> { call, cause ->
-            call.respond(HttpStatusCode.NotFound, ErrorResponse("BOOK_NOT_FOUND", cause.message ?: "Not found"))
+        // One handler for the whole ApiException hierarchy — adding a new domain error
+        // (see BookNotFoundException) never requires a change here.
+        exception<ApiException> { call, cause ->
+            call.respond(cause.status, cause.error)
         }
     }
 
