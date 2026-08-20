@@ -1,8 +1,10 @@
 package io.github.hayatoyagi.ktortyped.sample
 
 import io.github.hayatoyagi.ktortyped.sample.routing.authorRoutes
+import io.github.hayatoyagi.ktortyped.sample.routing.BookNotFoundException
 import io.github.hayatoyagi.ktortyped.sample.routing.bookRoutes
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.openapi.OpenApiInfo
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
@@ -11,9 +13,11 @@ import io.ktor.server.application.plugin
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.plugins.swagger.SwaggerConfig
 import io.ktor.server.plugins.swagger.swaggerUI
 import io.ktor.server.resources.Resources
+import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.RoutingRoot
@@ -33,6 +37,11 @@ fun main() {
 fun Application.configureSample() {
     install(Resources)
     install(ContentNegotiation) { json() }
+    install(StatusPages) {
+        exception<BookNotFoundException> { call, cause ->
+            call.respond(HttpStatusCode.NotFound, ErrorResponse("BOOK_NOT_FOUND", cause.message ?: "Not found"))
+        }
+    }
 
     routing {
         swaggerUI(path = "swagger") {

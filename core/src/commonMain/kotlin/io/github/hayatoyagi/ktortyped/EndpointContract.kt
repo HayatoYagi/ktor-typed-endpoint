@@ -21,8 +21,9 @@ abstract class EndpointContract<Resource : Any>(
  *
  * @param Resource The Ktor `@Resource`-annotated class for the route.
  * @param Response The response body type.
+ * @param Error The error response body type. Use `Unit` if the error body is not typed.
  */
-abstract class GetEndpointContract<Resource : Any, Response : Any>(
+abstract class GetEndpointContract<Resource : Any, Response : Any, Error : Any>(
     successStatusCode: HttpStatusCode = HttpStatusCode.OK,
 ) : EndpointContract<Resource>(successStatusCode = successStatusCode)
 
@@ -32,8 +33,9 @@ abstract class GetEndpointContract<Resource : Any, Response : Any>(
  * @param Resource The Ktor `@Resource`-annotated class for the route.
  * @param Request The request body type.
  * @param Response The response body type.
+ * @param Error The error response body type. Use `Unit` if the error body is not typed.
  */
-abstract class PostEndpointContract<Resource : Any, Request : Any, Response : Any>(
+abstract class PostEndpointContract<Resource : Any, Request : Any, Response : Any, Error : Any>(
     successStatusCode: HttpStatusCode = HttpStatusCode.Created,
 ) : EndpointContract<Resource>(successStatusCode = successStatusCode)
 
@@ -43,8 +45,9 @@ abstract class PostEndpointContract<Resource : Any, Request : Any, Response : An
  * @param Resource The Ktor `@Resource`-annotated class for the route.
  * @param Request The request body type.
  * @param Response The response body type.
+ * @param Error The error response body type. Use `Unit` if the error body is not typed.
  */
-abstract class PutEndpointContract<Resource : Any, Request : Any, Response : Any>(
+abstract class PutEndpointContract<Resource : Any, Request : Any, Response : Any, Error : Any>(
     successStatusCode: HttpStatusCode = HttpStatusCode.OK,
 ) : EndpointContract<Resource>(successStatusCode = successStatusCode)
 
@@ -54,8 +57,9 @@ abstract class PutEndpointContract<Resource : Any, Request : Any, Response : Any
  * @param Resource The Ktor `@Resource`-annotated class for the route.
  * @param Request The request body type.
  * @param Response The response body type.
+ * @param Error The error response body type. Use `Unit` if the error body is not typed.
  */
-abstract class PatchEndpointContract<Resource : Any, Request : Any, Response : Any>(
+abstract class PatchEndpointContract<Resource : Any, Request : Any, Response : Any, Error : Any>(
     successStatusCode: HttpStatusCode = HttpStatusCode.OK,
 ) : EndpointContract<Resource>(successStatusCode = successStatusCode)
 
@@ -64,15 +68,16 @@ abstract class PatchEndpointContract<Resource : Any, Request : Any, Response : A
  *
  * @param Resource The Ktor `@Resource`-annotated class for the route.
  * @param Response The response body type.
+ * @param Error The error response body type. Use `Unit` if the error body is not typed.
  */
-abstract class DeleteEndpointContract<Resource : Any, Response : Any>(
+abstract class DeleteEndpointContract<Resource : Any, Response : Any, Error : Any>(
     successStatusCode: HttpStatusCode = HttpStatusCode.OK,
 ) : EndpointContract<Resource>(successStatusCode = successStatusCode)
 
 /**
  * Contract for a `HEAD` endpoint.
  *
- * HEAD responses have no body — only status code and headers.
+ * HEAD responses have no body — only status code and headers, even on failure.
  *
  * @param Resource The Ktor `@Resource`-annotated class for the route.
  */
@@ -85,7 +90,8 @@ abstract class HeadEndpointContract<Resource : Any>(
  *
  * @param Resource The Ktor `@Resource`-annotated class for the route.
  * @param Response The response body type.
+ * @param Error The error response body type. Use `Unit` if the error body is not typed.
  */
-abstract class OptionsEndpointContract<Resource : Any, Response : Any>(
+abstract class OptionsEndpointContract<Resource : Any, Response : Any, Error : Any>(
     successStatusCode: HttpStatusCode = HttpStatusCode.OK,
 ) : EndpointContract<Resource>(successStatusCode = successStatusCode)

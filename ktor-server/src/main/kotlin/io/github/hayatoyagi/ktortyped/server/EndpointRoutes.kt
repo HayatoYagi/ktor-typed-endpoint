@@ -25,8 +25,8 @@ import io.github.hayatoyagi.ktortyped.PutEndpointContract
  * Automatically responds with [GetEndpointContract.successStatusCode] and
  * attaches OpenAPI documentation generated from the contract.
  */
-inline fun <reified Resource : Any, reified Response : Any> Route.endpoint(
-    contract: GetEndpointContract<Resource, Response>,
+inline fun <reified Resource : Any, reified Response : Any, reified Error : Any> Route.endpoint(
+    contract: GetEndpointContract<Resource, Response, Error>,
     noinline body: suspend RoutingContext.(Resource) -> Response,
 ): Route = get<Resource> { resource ->
     val response = body(resource)
@@ -39,8 +39,13 @@ inline fun <reified Resource : Any, reified Response : Any> Route.endpoint(
  * Automatically deserializes the request body, responds with [PostEndpointContract.successStatusCode],
  * and attaches OpenAPI documentation generated from the contract.
  */
-inline fun <reified Resource : Any, reified Request : Any, reified Response : Any> Route.endpoint(
-    contract: PostEndpointContract<Resource, Request, Response>,
+inline fun <
+    reified Resource : Any,
+    reified Request : Any,
+    reified Response : Any,
+    reified Error : Any,
+    > Route.endpoint(
+    contract: PostEndpointContract<Resource, Request, Response, Error>,
     noinline body: suspend RoutingContext.(resource: Resource, request: Request) -> Response,
 ): Route = post<Resource> { resource ->
     val request = call.receive<Request>()
@@ -54,8 +59,13 @@ inline fun <reified Resource : Any, reified Request : Any, reified Response : An
  * Automatically deserializes the request body, responds with [PutEndpointContract.successStatusCode],
  * and attaches OpenAPI documentation generated from the contract.
  */
-inline fun <reified Resource : Any, reified Request : Any, reified Response : Any> Route.endpoint(
-    contract: PutEndpointContract<Resource, Request, Response>,
+inline fun <
+    reified Resource : Any,
+    reified Request : Any,
+    reified Response : Any,
+    reified Error : Any,
+    > Route.endpoint(
+    contract: PutEndpointContract<Resource, Request, Response, Error>,
     noinline body: suspend RoutingContext.(resource: Resource, request: Request) -> Response,
 ): Route = put<Resource> { resource ->
     val request = call.receive<Request>()
@@ -69,8 +79,13 @@ inline fun <reified Resource : Any, reified Request : Any, reified Response : An
  * Automatically deserializes the request body, responds with [PatchEndpointContract.successStatusCode],
  * and attaches OpenAPI documentation generated from the contract.
  */
-inline fun <reified Resource : Any, reified Request : Any, reified Response : Any> Route.endpoint(
-    contract: PatchEndpointContract<Resource, Request, Response>,
+inline fun <
+    reified Resource : Any,
+    reified Request : Any,
+    reified Response : Any,
+    reified Error : Any,
+    > Route.endpoint(
+    contract: PatchEndpointContract<Resource, Request, Response, Error>,
     noinline body: suspend RoutingContext.(resource: Resource, request: Request) -> Response,
 ): Route = patch<Resource> { resource ->
     val request = call.receive<Request>()
@@ -84,8 +99,8 @@ inline fun <reified Resource : Any, reified Request : Any, reified Response : An
  * Automatically responds with [DeleteEndpointContract.successStatusCode] and
  * attaches OpenAPI documentation generated from the contract.
  */
-inline fun <reified Resource : Any, reified Response : Any> Route.endpoint(
-    contract: DeleteEndpointContract<Resource, Response>,
+inline fun <reified Resource : Any, reified Response : Any, reified Error : Any> Route.endpoint(
+    contract: DeleteEndpointContract<Resource, Response, Error>,
     noinline body: suspend RoutingContext.(Resource) -> Response,
 ): Route = delete<Resource> { resource ->
     val response = body(resource)
@@ -112,8 +127,8 @@ inline fun <reified Resource : Any> Route.endpoint(
  * Automatically responds with [OptionsEndpointContract.successStatusCode] and
  * attaches OpenAPI documentation generated from the contract.
  */
-inline fun <reified Resource : Any, reified Response : Any> Route.endpoint(
-    contract: OptionsEndpointContract<Resource, Response>,
+inline fun <reified Resource : Any, reified Response : Any, reified Error : Any> Route.endpoint(
+    contract: OptionsEndpointContract<Resource, Response, Error>,
     noinline body: suspend RoutingContext.(Resource) -> Response,
 ): Route = options<Resource> { resource ->
     val response = body(resource)

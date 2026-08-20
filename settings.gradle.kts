@@ -17,4 +17,5 @@ rootProject.name = "ktor-typed-endpoint"
 
 include(":core")
 include(":ktor-server")
+include(":ktor-client")
 include(":sample")

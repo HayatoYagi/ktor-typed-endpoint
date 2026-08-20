@@ -75,3 +75,8 @@ data class AuthorResponse(
 )
 @Serializable
 data class CreateAuthorRequest(val name: String)
+
+// --- Error models ---
+
+@Serializable
+data class ErrorResponse(val code: String, val message: String)

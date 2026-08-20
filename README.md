@@ -14,6 +14,8 @@ Type-safe HTTP endpoint contracts for Ktor — bind routing, request/response ty
 - [Features](#features)
   - [@ApiTag — OpenAPI tag inheritance](#apitag--openapi-tag-inheritance)
   - [@ApiDescription — model-driven OpenAPI descriptions](#apidescription--model-driven-openapi-descriptions)
+- [Client](#client)
+  - [Error handling](#error-handling)
 - [Sample App](#sample-app)
 - [License](#license)
 
@@ -56,7 +58,7 @@ describe {
 
 ```kotlin
 // 1. Define the contract once
-object PostBook : PostEndpointContract<Books, CreateBookRequest, BookResponse>(
+object PostBook : PostEndpointContract<Books, CreateBookRequest, BookResponse, ErrorResponse>(
     successStatusCode = HttpStatusCode.Created,
 )
 
@@ -82,11 +84,14 @@ repositories {
 ```
 
 ```kotlin
-// shared module (contracts live here — KMP: JVM + Android)
+// shared module (contracts live here — KMP: JVM + Android + iOS + JS/Wasm)
 implementation("io.github.hayatoyagi:ktor-typed-endpoint-core:<version>")
 
 // server module (route registration + OpenAPI)
 implementation("io.github.hayatoyagi:ktor-typed-endpoint-ktor-server:<version>")
+
+// client module (type-safe HTTP requests with typed error responses)
+implementation("io.github.hayatoyagi:ktor-typed-endpoint-ktor-client:<version>")
 ```
 
 ## Quick Start
@@ -110,16 +115,19 @@ class ApiRoutes {
 
 ### 2. Define contracts
 
-```kotlin
-object GetBooks : GetEndpointContract<ApiRoutes.Books, BookListResponse>()
+The last type parameter is the error response body — use a shared `ErrorResponse` type,
+or `Unit` for endpoints that don't need a typed error body (see [Error handling](#error-handling)).
 
-object PostBook : PostEndpointContract<ApiRoutes.Books, CreateBookRequest, BookResponse>(
+```kotlin
+object GetBooks : GetEndpointContract<ApiRoutes.Books, BookListResponse, ErrorResponse>()
+
+object PostBook : PostEndpointContract<ApiRoutes.Books, CreateBookRequest, BookResponse, ErrorResponse>(
     successStatusCode = HttpStatusCode.Created,
 )
 
-object PutBook : PutEndpointContract<ApiRoutes.Books.ById, UpdateBookRequest, BookResponse>()
+object PutBook : PutEndpointContract<ApiRoutes.Books.ById, UpdateBookRequest, BookResponse, ErrorResponse>()
 
-object PatchBook : PatchEndpointContract<ApiRoutes.Books.ById, PatchBookRequest, BookResponse>()
+object PatchBook : PatchEndpointContract<ApiRoutes.Books.ById, PatchBookRequest, BookResponse, ErrorResponse>()
 ```
 
 ### 3. Register routes
@@ -191,6 +199,61 @@ data class CreateBookRequest(
 ```
 
 The description appears as `requestBody.description` for request models and `responses.<status>.description` for response models.
+
+## Client
+
+`ktor-typed-endpoint-ktor-client` provides `HttpClient.request(contract, resource)` extension
+functions. The response type is inferred from the contract — no explicit type annotation needed.
+
+```kotlin
+val client = HttpClient(CIO) {
+    install(Resources)
+    install(ContentNegotiation) { json() }
+    defaultRequest { url("https://api.example.com") }
+}
+
+// Response type (BookResponse) is inferred from GetBookById's contract
+val book = client.request(GetBookById, ApiRoutes.Books.ById(id = "42"))
+
+// POST with a request body
+val created = client.request(PostBook, ApiRoutes.Books(), CreateBookRequest(title = "Kotlin in Action", authorId = "1"))
+```
+
+Compare with plain Ktor, where you specify the response type manually and must know the HTTP method:
+
+```kotlin
+// plain Ktor
+val book: BookResponse = client.get(ApiRoutes.Books.ById(id = "42")).body()
+```
+
+### Error handling
+
+The contract's `Error` type parameter is the single source of truth for both the server's and the
+client's understanding of a failure response — not just the success path. When a response's status
+doesn't match the contract's `successStatusCode`, `request(...)` throws `EndpointErrorException`
+instead of a generic exception:
+
+```kotlin
+try {
+    client.request(GetBookById, ApiRoutes.Books.ById(id = "missing"))
+} catch (e: EndpointErrorException) {
+    val error: ErrorResponse? = e.errorBodyAs<ErrorResponse>()
+    println("Request failed with ${e.status}: ${error?.message}")
+}
+```
+
+`errorBodyAs<T>()` does a reified runtime check, so it's safe even though `EndpointErrorException`
+itself can't be generic (Kotlin, like Java, forbids a `Throwable` subclass with type parameters).
+`errorBody` is best-effort: if the response couldn't be deserialized as the contract's `Error` type,
+`errorBodyAs<T>()` returns `null` rather than masking the original failure with a secondary exception.
+
+For endpoints where a typed error body doesn't matter, declare the contract with `Unit`:
+
+```kotlin
+object PostAuthor : PostEndpointContract<ApiRoutes.Authors, CreateAuthorRequest, AuthorResponse, Unit>(
+    successStatusCode = HttpStatusCode.Created,
+)
+```
 
 ## Sample App
 

@@ -12,6 +12,9 @@ import io.github.hayatoyagi.ktortyped.sample.ReviewListResponse
 import io.github.hayatoyagi.ktortyped.server.endpoint
 import io.ktor.server.routing.Route
 
+/** Thrown by [bookRoutes] for an unknown book id; mapped to a 404 + `ErrorResponse` by `StatusPages` in `SampleApp`. */
+class BookNotFoundException(id: String) : Exception("Book not found: $id")
+
 fun Route.bookRoutes() {
     endpoint(GetBooks) {
         // In a real app, this would call a use case or repository
@@ -24,6 +27,7 @@ fun Route.bookRoutes() {
     }
 
     endpoint(GetBookById) { resource ->
+        if (resource.id == "missing") throw BookNotFoundException(resource.id)
         BookResponse(resource.id, "Sample Book ${resource.id}", "author-1")
     }
 

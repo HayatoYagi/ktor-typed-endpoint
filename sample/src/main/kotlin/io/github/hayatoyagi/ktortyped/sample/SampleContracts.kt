@@ -8,26 +8,28 @@ import io.ktor.http.HttpStatusCode
 
 // --- Book contracts ---
 
-object GetBooks : GetEndpointContract<SampleRoutes.Books, BookListResponse>()
+object GetBooks : GetEndpointContract<SampleRoutes.Books, BookListResponse, Unit>()
 
-object GetBookById : GetEndpointContract<SampleRoutes.Books.ById, BookResponse>()
+// Uses a typed error body: GET /books/{id} responds 404 + ErrorResponse for an unknown id.
+object GetBookById : GetEndpointContract<SampleRoutes.Books.ById, BookResponse, ErrorResponse>()
 
-object PostBook : PostEndpointContract<SampleRoutes.Books, CreateBookRequest, BookResponse>(
+object PostBook : PostEndpointContract<SampleRoutes.Books, CreateBookRequest, BookResponse, Unit>(
     successStatusCode = HttpStatusCode.Created,
 )
 
-object PutBook : PutEndpointContract<SampleRoutes.Books.ById, UpdateBookRequest, BookResponse>()
+object PutBook : PutEndpointContract<SampleRoutes.Books.ById, UpdateBookRequest, BookResponse, Unit>()
 
-object PatchBook : PatchEndpointContract<SampleRoutes.Books.ById, PatchBookRequest, BookResponse>()
+object PatchBook : PatchEndpointContract<SampleRoutes.Books.ById, PatchBookRequest, BookResponse, Unit>()
 
 // --- Review contracts (tag inherited from Books via parent chain) ---
 
-object GetBookReviews : GetEndpointContract<SampleRoutes.Books.ById.Reviews, ReviewListResponse>()
+object GetBookReviews : GetEndpointContract<SampleRoutes.Books.ById.Reviews, ReviewListResponse, Unit>()
 
 // --- Author contracts ---
 
-object GetAuthorById : GetEndpointContract<SampleRoutes.Authors.ById, AuthorResponse>()
+object GetAuthorById : GetEndpointContract<SampleRoutes.Authors.ById, AuthorResponse, Unit>()
 
-object PostAuthor : PostEndpointContract<SampleRoutes.Authors, CreateAuthorRequest, AuthorResponse>(
+// Uses Unit for its error body: this endpoint doesn't need a typed error, just a status code.
+object PostAuthor : PostEndpointContract<SampleRoutes.Authors, CreateAuthorRequest, AuthorResponse, Unit>(
     successStatusCode = HttpStatusCode.Created,
 )
