@@ -36,9 +36,9 @@ fun Application.configureSample() {
     install(Resources)
     install(ContentNegotiation) { json() }
     install(StatusPages) {
-        // One handler for the whole ApiException hierarchy — adding a new domain error
-        // (see BookNotFoundException) never requires a change here.
-        exception<ApiException> { call, cause ->
+        // One handler for the whole SampleDomainException hierarchy — adding a new domain
+        // error (see BookNotFoundException) never requires a change here.
+        exception<SampleDomainException> { call, cause ->
             call.respond(cause.status, cause.error)
         }
     }

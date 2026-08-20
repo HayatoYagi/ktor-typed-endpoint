@@ -1,6 +1,6 @@
 package io.github.hayatoyagi.ktortyped.sample.routing
 
-import io.github.hayatoyagi.ktortyped.sample.ApiException
+import io.github.hayatoyagi.ktortyped.sample.SampleDomainException
 import io.github.hayatoyagi.ktortyped.sample.BookListResponse
 import io.github.hayatoyagi.ktortyped.sample.BookResponse
 import io.github.hayatoyagi.ktortyped.sample.ErrorResponse
@@ -15,8 +15,8 @@ import io.github.hayatoyagi.ktortyped.server.endpoint
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.routing.Route
 
-/** Thrown by [bookRoutes] for an unknown book id; mapped to its [error] response by the generic [ApiException] handler. */
-class BookNotFoundException(id: String) : ApiException(
+/** Thrown by [bookRoutes] for an unknown book id; mapped to its [error] response by the generic [SampleDomainException] handler. */
+class BookNotFoundException(id: String) : SampleDomainException(
     status = HttpStatusCode.NotFound,
     error = ErrorResponse(code = "BOOK_NOT_FOUND", message = "Book not found: $id"),
 )
