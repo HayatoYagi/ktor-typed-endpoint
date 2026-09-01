@@ -29,26 +29,37 @@ import kotlin.reflect.KClass
 }
 
 @OptIn(ExperimentalKtorApi::class)
-@PublishedApi internal inline fun <reified Resource : Any, reified Response : Any> Route.describeContract(
-    contract: GetEndpointContract<Resource, Response>,
+@PublishedApi internal inline fun <reified Resource : Any, reified Response : Any, reified Error : Any> Route.describeContract(
+    contract: GetEndpointContract<Resource, Response, Error>,
 ): Route = describe {
     Resource::class.collectApiTags().forEach { tag(it) }
     val responseDescription = Response::class.apiDescription()
+    val errorDescription = Error::class.apiDescription()
     responses {
         contract.successStatusCode {
             schema = jsonSchema<Response>()
             responseDescription?.let { description = it }
         }
+        default {
+            schema = jsonSchema<Error>()
+            errorDescription?.let { description = it }
+        }
     }
 }
 
 @OptIn(ExperimentalKtorApi::class)
-@PublishedApi internal inline fun <reified Resource : Any, reified Request : Any, reified Response : Any> Route.describeContract(
-    contract: PostEndpointContract<Resource, Request, Response>,
+@PublishedApi internal inline fun <
+    reified Resource : Any,
+    reified Request : Any,
+    reified Response : Any,
+    reified Error : Any,
+    > Route.describeContract(
+    contract: PostEndpointContract<Resource, Request, Response, Error>,
 ): Route = describe {
     Resource::class.collectApiTags().forEach { tag(it) }
     val requestDescription = Request::class.apiDescription()
     val responseDescription = Response::class.apiDescription()
+    val errorDescription = Error::class.apiDescription()
     requestBody {
         schema = jsonSchema<Request>()
         requestDescription?.let { description = it }
@@ -58,16 +69,26 @@ import kotlin.reflect.KClass
             schema = jsonSchema<Response>()
             responseDescription?.let { description = it }
         }
+        default {
+            schema = jsonSchema<Error>()
+            errorDescription?.let { description = it }
+        }
     }
 }
 
 @OptIn(ExperimentalKtorApi::class)
-@PublishedApi internal inline fun <reified Resource : Any, reified Request : Any, reified Response : Any> Route.describeContract(
-    contract: PutEndpointContract<Resource, Request, Response>,
+@PublishedApi internal inline fun <
+    reified Resource : Any,
+    reified Request : Any,
+    reified Response : Any,
+    reified Error : Any,
+    > Route.describeContract(
+    contract: PutEndpointContract<Resource, Request, Response, Error>,
 ): Route = describe {
     Resource::class.collectApiTags().forEach { tag(it) }
     val requestDescription = Request::class.apiDescription()
     val responseDescription = Response::class.apiDescription()
+    val errorDescription = Error::class.apiDescription()
     requestBody {
         schema = jsonSchema<Request>()
         requestDescription?.let { description = it }
@@ -77,16 +98,26 @@ import kotlin.reflect.KClass
             schema = jsonSchema<Response>()
             responseDescription?.let { description = it }
         }
+        default {
+            schema = jsonSchema<Error>()
+            errorDescription?.let { description = it }
+        }
     }
 }
 
 @OptIn(ExperimentalKtorApi::class)
-@PublishedApi internal inline fun <reified Resource : Any, reified Request : Any, reified Response : Any> Route.describeContract(
-    contract: PatchEndpointContract<Resource, Request, Response>,
+@PublishedApi internal inline fun <
+    reified Resource : Any,
+    reified Request : Any,
+    reified Response : Any,
+    reified Error : Any,
+    > Route.describeContract(
+    contract: PatchEndpointContract<Resource, Request, Response, Error>,
 ): Route = describe {
     Resource::class.collectApiTags().forEach { tag(it) }
     val requestDescription = Request::class.apiDescription()
     val responseDescription = Response::class.apiDescription()
+    val errorDescription = Error::class.apiDescription()
     requestBody {
         schema = jsonSchema<Request>()
         requestDescription?.let { description = it }
@@ -96,19 +127,28 @@ import kotlin.reflect.KClass
             schema = jsonSchema<Response>()
             responseDescription?.let { description = it }
         }
+        default {
+            schema = jsonSchema<Error>()
+            errorDescription?.let { description = it }
+        }
     }
 }
 
 @OptIn(ExperimentalKtorApi::class)
-@PublishedApi internal inline fun <reified Resource : Any, reified Response : Any> Route.describeContract(
-    contract: DeleteEndpointContract<Resource, Response>,
+@PublishedApi internal inline fun <reified Resource : Any, reified Response : Any, reified Error : Any> Route.describeContract(
+    contract: DeleteEndpointContract<Resource, Response, Error>,
 ): Route = describe {
     Resource::class.collectApiTags().forEach { tag(it) }
     val responseDescription = Response::class.apiDescription()
+    val errorDescription = Error::class.apiDescription()
     responses {
         contract.successStatusCode {
             schema = jsonSchema<Response>()
             responseDescription?.let { description = it }
+        }
+        default {
+            schema = jsonSchema<Error>()
+            errorDescription?.let { description = it }
         }
     }
 }
@@ -124,15 +164,20 @@ import kotlin.reflect.KClass
 }
 
 @OptIn(ExperimentalKtorApi::class)
-@PublishedApi internal inline fun <reified Resource : Any, reified Response : Any> Route.describeContract(
-    contract: OptionsEndpointContract<Resource, Response>,
+@PublishedApi internal inline fun <reified Resource : Any, reified Response : Any, reified Error : Any> Route.describeContract(
+    contract: OptionsEndpointContract<Resource, Response, Error>,
 ): Route = describe {
     Resource::class.collectApiTags().forEach { tag(it) }
     val responseDescription = Response::class.apiDescription()
+    val errorDescription = Error::class.apiDescription()
     responses {
         contract.successStatusCode {
             schema = jsonSchema<Response>()
             responseDescription?.let { description = it }
+        }
+        default {
+            schema = jsonSchema<Error>()
+            errorDescription?.let { description = it }
         }
     }
 }

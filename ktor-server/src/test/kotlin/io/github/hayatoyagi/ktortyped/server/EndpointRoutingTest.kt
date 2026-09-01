@@ -87,14 +87,17 @@ data class PatchItemRequest(val name: String?)
 @Serializable
 data class DeletedResponse(val deleted: Boolean)
 
-object GetItems : GetEndpointContract<Items, ItemListResponse>()
-object GetItemById : GetEndpointContract<Items.ById, ItemResponse>()
-object PostItem : PostEndpointContract<Items, CreateItemRequest, ItemCreatedResponse>()
-object PutItem : PutEndpointContract<Items.ById, UpdateItemRequest, ItemResponse>()
-object PatchItem : PatchEndpointContract<Items.ById, PatchItemRequest, ItemResponse>()
-object DeleteItem : DeleteEndpointContract<Items.ById, DeletedResponse>()
-object GetTagged : GetEndpointContract<Tagged, ItemListResponse>()
-object GetTaggedById : GetEndpointContract<Tagged.ById, ItemResponse>()
+@Serializable
+data class ItemErrorResponse(val message: String)
+
+object GetItems : GetEndpointContract<Items, ItemListResponse, Unit>()
+object GetItemById : GetEndpointContract<Items.ById, ItemResponse, ItemErrorResponse>()
+object PostItem : PostEndpointContract<Items, CreateItemRequest, ItemCreatedResponse, Unit>()
+object PutItem : PutEndpointContract<Items.ById, UpdateItemRequest, ItemResponse, Unit>()
+object PatchItem : PatchEndpointContract<Items.ById, PatchItemRequest, ItemResponse, Unit>()
+object DeleteItem : DeleteEndpointContract<Items.ById, DeletedResponse, Unit>()
+object GetTagged : GetEndpointContract<Tagged, ItemListResponse, Unit>()
+object GetTaggedById : GetEndpointContract<Tagged.ById, ItemResponse, Unit>()
 
 @OptIn(ExperimentalKtorApi::class)
 private fun Application.openApiSource() = OpenApiDocSource.Routing(
@@ -211,6 +214,15 @@ class EndpointDescriptionsTest {
         val responses = paths["/items/{id}"]!!.jsonObject["get"]!!.jsonObject["responses"]!!.jsonObject
         assertTrue(responses.containsKey("200"))
         val schema = responses["200"]!!.jsonObject["content"]?.jsonObject?.get("application/json")?.jsonObject?.get("schema")
+        assertNotNull(schema)
+    }
+
+    @Test
+    fun `GET endpoint generates default error response schema`() = withTestApp {
+        val paths = Json.parseToJsonElement(client.get("/openapi.json").bodyAsText()).jsonObject["paths"]!!.jsonObject
+        val responses = paths["/items/{id}"]!!.jsonObject["get"]!!.jsonObject["responses"]!!.jsonObject
+        assertTrue(responses.containsKey("default"))
+        val schema = responses["default"]!!.jsonObject["content"]?.jsonObject?.get("application/json")?.jsonObject?.get("schema")
         assertNotNull(schema)
     }
 
