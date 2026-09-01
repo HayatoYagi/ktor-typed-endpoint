@@ -1,4 +1,4 @@
-package io.github.hayatoyagi.ktortyped.sample
+package io.github.hayatoyagi.ktortyped.sample.contracts
 
 import io.github.hayatoyagi.ktortyped.ApiDescription
 import kotlinx.serialization.Serializable

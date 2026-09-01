@@ -1,8 +1,8 @@
-package io.github.hayatoyagi.ktortyped.sample.routing
+package io.github.hayatoyagi.ktortyped.sample.server.routing
 
-import io.github.hayatoyagi.ktortyped.sample.AuthorResponse
-import io.github.hayatoyagi.ktortyped.sample.GetAuthorById
-import io.github.hayatoyagi.ktortyped.sample.PostAuthor
+import io.github.hayatoyagi.ktortyped.sample.contracts.AuthorResponse
+import io.github.hayatoyagi.ktortyped.sample.contracts.GetAuthorById
+import io.github.hayatoyagi.ktortyped.sample.contracts.PostAuthor
 import io.github.hayatoyagi.ktortyped.server.endpoint
 import io.ktor.server.routing.Route
 

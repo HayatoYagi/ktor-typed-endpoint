@@ -1,7 +1,7 @@
-package io.github.hayatoyagi.ktortyped.sample
+package io.github.hayatoyagi.ktortyped.sample.server
 
-import io.github.hayatoyagi.ktortyped.sample.routing.authorRoutes
-import io.github.hayatoyagi.ktortyped.sample.routing.bookRoutes
+import io.github.hayatoyagi.ktortyped.sample.server.routing.authorRoutes
+import io.github.hayatoyagi.ktortyped.sample.server.routing.bookRoutes
 import io.ktor.http.ContentType
 import io.ktor.openapi.OpenApiInfo
 import io.ktor.serialization.kotlinx.json.json

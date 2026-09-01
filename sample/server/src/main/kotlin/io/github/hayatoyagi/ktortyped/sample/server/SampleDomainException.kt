@@ -1,5 +1,6 @@
-package io.github.hayatoyagi.ktortyped.sample
+package io.github.hayatoyagi.ktortyped.sample.server
 
+import io.github.hayatoyagi.ktortyped.sample.contracts.ErrorResponse
 import io.ktor.http.HttpStatusCode
 
 /**

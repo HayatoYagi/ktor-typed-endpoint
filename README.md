@@ -257,13 +257,24 @@ object PostAuthor : PostEndpointContract<ApiRoutes.Authors, CreateAuthorRequest,
 
 ## Sample App
 
-The `sample` module contains a minimal runnable Ktor server that demonstrates all library features — nested resources, tag inheritance, multiple HTTP methods, and `@ApiDescription`.
+The sample is split into three modules that mirror how a real app uses this library — contracts
+shared between a server and a client, not just a server demoing itself:
+
+- `sample/contracts` — the `EndpointContract`/`@Resource` definitions, depends only on `core`
+- `sample/server` — registers routes from those contracts via `ktor-server`
+- `sample/client` — calls the running server using the *exact same* contract objects via `ktor-client`, including triggering the typed-error path
+
+Start the server, then run the client against it from a second terminal:
 
 ```bash
-./gradlew :sample:run
+./gradlew :sample:server:run
 ```
 
-Then open `http://localhost:8080/swagger` to explore the generated API documentation.
+```bash
+./gradlew :sample:client:run
+```
+
+The server also exposes `http://localhost:8080/swagger` to explore the generated API documentation.
 
 ## License
 

@@ -10,11 +10,11 @@ kotlin {
 }
 
 application {
-    mainClass.set("io.github.hayatoyagi.ktortyped.sample.SampleAppKt")
+    mainClass.set("io.github.hayatoyagi.ktortyped.sample.server.SampleAppKt")
 }
 
 dependencies {
-    implementation(project(":core"))
+    implementation(project(":sample:contracts"))
     implementation(project(":ktor-server"))
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.netty)
@@ -29,6 +29,6 @@ dependencies {
 
 ktor {
     fatJar {
-        archiveFileName.set("ktor-typed-endpoint-sample.jar")
+        archiveFileName.set("ktor-typed-endpoint-sample-server.jar")
     }
 }
